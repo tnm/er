@@ -15,3 +15,11 @@ Eric Cestari
 tonyg
 	- BLPOP & BRPOP
 	https://bitbucket.org/tonyg/erldis/
+
+mattsta
+  - hashes
+  - multibulk commands
+  - er; erp
+  - breaking backwards compatability with prior erldis
+  - screaming at the hard tabs to go away
+  http://github.com/mattsta/er
