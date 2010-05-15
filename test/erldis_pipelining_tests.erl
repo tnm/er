@@ -3,9 +3,9 @@
 -include_lib("eunit/include/eunit.hrl").
 -include("erldis.hrl").
 
-pipelining_test()->
+pipelining_test() ->
   {ok, Client} = erldis:connect("localhost", 6379),
-  ?assertEqual(erldis:flushdb(Client), ok),
+  ?assertEqual(er:flushdb(Client), ok),
   erldis:set_pipelining(Client, true),
   erldis:get(Client, <<"pippo">>),
   erldis:set(Client, <<"hello">>, <<"kitty!">>),

@@ -20,7 +20,7 @@ quit(Client) -> erldis_client:stop(Client).
 %% Commands operating on every value %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-exists(Client, Key) -> erldis_client:sr_scall(Client, [<<"exists">>, Key]).
+exists(Client, Key) -> tfstat(erldis_client:sr_scall(Client, [<<"exists">>, Key])).
 
 del(Client, Key) -> erldis_client:sr_scall(Client, [<<"del">>, Key]).
 
@@ -67,7 +67,7 @@ getset(Client, Key, Value) ->
 mget(Client, Keys) -> erldis_client:scall(Client, [<<"mget">> | Keys]).
 
 setnx(Client, Key, Value) ->
-	erldis_client:sr_scall(Client, [<<"setnx">>, Key, Value]).
+	tfstat(erldis_client:sr_scall(Client, [<<"setnx">>, Key, Value])).
 
 incr(Client, Key) ->
 	numeric(erldis_client:sr_scall(Client, [<<"incr">>, Key])).
@@ -125,7 +125,7 @@ brpop(Client, Keys, Timeout) -> erldis_client:bcall(Client, [<<"brpop">> | Keys]
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 sadd(Client, Key, Member) ->
-	erldis_client:sr_scall(Client, [<<"sadd">>, Key, Member]).
+	updatestat(erldis_client:sr_scall(Client, [<<"sadd">>, Key, Member])).
 
 srem(Client, Key, Member) ->
 	erldis_client:sr_scall(Client, [<<"srem">>, Key, Member]).
@@ -141,7 +141,7 @@ scard(Client, Key) ->
 	numeric(erldis_client:sr_scall(Client, [<<"scard">>, Key])).
 
 sismember(Client, Key, Member) ->
-	erldis_client:sr_scall(Client, [<<"sismember">>, Key, Member]).
+	tfstat(erldis_client:sr_scall(Client, [<<"sismember">>, Key, Member])).
 
 sintersect(Client, Keys) -> sinter(Client, Keys).
 
@@ -169,10 +169,10 @@ smembers(Client, Key) ->
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 zadd(Client, Key, Score, Member) ->
-	erldis_client:sr_scall(Client, [<<"zadd">>, Key, Score, Member]).
+	updatestat(erldis_client:sr_scall(Client, [<<"zadd">>, Key, Score, Member])).
 
 zrem(Client, Key, Member) ->
-	erldis_client:sr_scall(Client, [<<"zrem">>, Key, Member]).
+	tfstat(erldis_client:sr_scall(Client, [<<"zrem">>, Key, Member])).
 
 zincrby(Client, Key, By, Member) ->
 	numeric(erldis_client:sr_scall(Client, [<<"zincrby">>, Key, By, Member])).
@@ -220,16 +220,16 @@ hmset(Client, Key, Fields) ->
 	erldis_client:sr_scall(Client, [<<"hmset">>, Key | Fields]).
 
 hincrby(Client, Key, Field, Incr) ->
-	erldis_client:sr_scall(Client, [<<"hincrby">>, Key, Field, Incr]).
+	numeric(erldis_client:sr_scall(Client, [<<"hincrby">>, Key, Field, Incr])).
 
 hdel(Client, Key, Field) ->
-	erldis_client:sr_scall(Client, [<<"hdel">>, Key, Field]).
+	tfstat(erldis_client:sr_scall(Client, [<<"hdel">>, Key, Field])).
 
 hlen(Client, Key) ->
 	numeric(erldis_client:sr_scall(Client, [<<"hlen">>, Key])).
 
 hexists(Client, Key, Field) ->
-	erldis_client:sr_scall(Client, [<<"hexists">>, Key, Field]).
+	tfstat(erldis_client:sr_scall(Client, [<<"hexists">>, Key, Field])).
 
 hkeys(Client, Key) ->
 	erldis_client:scall(Client, [<<"hkeys">>, Key]).
@@ -372,6 +372,12 @@ numeric(I) when is_list(I) ->
 			end
 	end;
 numeric(I) -> I.
+
+updatestat(<<"1">>) -> added;
+updatestat(<<"0">>) -> updated.
+
+tfstat(<<"1">>) -> true;
+tfstat(<<"0">>) -> false.
 
 withscores(L) -> 
 	withscores(L,[]).

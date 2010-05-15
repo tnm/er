@@ -198,5 +198,5 @@ setup() ->
 	% setup
 	application:load(erldis),
 	{ok, Client} = erldis_client:connect(),
-	?assertEqual(erldis:flushdb(Client), ok),
+	?assertEqual(er:flushdb(Client), ok),
 	Client.

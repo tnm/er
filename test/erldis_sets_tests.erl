@@ -6,7 +6,7 @@ sets_test() ->
 	% setup
 	application:load(erldis),
 	{ok, Client} = erldis_client:connect(),
-	?assertEqual(erldis:flushdb(Client), ok),
+	?assertEqual(er:flushdb(Client), ok),
 	% non existent set
 	?assertEqual(erldis_sets:is_set(Client, <<"foo">>), false),
 	?assertEqual(erldis_sets:to_list(Client, <<"foo">>), []),
@@ -37,15 +37,15 @@ sets_test() ->
 combo_sets_test() ->
 	application:load(erldis),
 	{ok, Client} = erldis_client:connect(),
-	?assertEqual(ok, erldis:flushdb(Client)),
+	?assertEqual(ok, er:flushdb(Client)),
 	
-	?assertEqual(true, erldis_sets:add_element(<<"1">>, Client, <<"foo">>)),
-	?assertEqual(true, erldis_sets:add_element(<<"2">>, Client, <<"foo">>)),
-	?assertEqual(true, erldis_sets:add_element(<<"3">>, Client, <<"foo">>)),
+	?assertEqual(added, erldis_sets:add_element(<<"1">>, Client, <<"foo">>)),
+	?assertEqual(added, erldis_sets:add_element(<<"2">>, Client, <<"foo">>)),
+	?assertEqual(added, erldis_sets:add_element(<<"3">>, Client, <<"foo">>)),
 	
-	?assertEqual(true, erldis_sets:add_element(<<"2">>, Client, <<"bar">>)),
-	?assertEqual(true, erldis_sets:add_element(<<"3">>, Client, <<"bar">>)),
-	?assertEqual(true, erldis_sets:add_element(<<"4">>, Client, <<"bar">>)),
+	?assertEqual(added, erldis_sets:add_element(<<"2">>, Client, <<"bar">>)),
+	?assertEqual(added, erldis_sets:add_element(<<"3">>, Client, <<"bar">>)),
+	?assertEqual(added, erldis_sets:add_element(<<"4">>, Client, <<"bar">>)),
 	
 	Union = erldis_sets:union(Client, [<<"foo">>, <<"bar">>]),
 	?assertEqual([<<"1">>, <<"2">>, <<"3">>, <<"4">>], lists:sort(Union)),
