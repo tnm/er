@@ -346,11 +346,12 @@ exec(Client, Fun) ->
 multibulk_cmd(Args) when is_binary(Args) ->
   multibulk_cmd([Args]);
 multibulk_cmd(Args) when is_list(Args) ->
-  TotalLength = length(Args),
- 
+  ConvertedArgs = lists:flatten([erldis_binaries:to_binary(B) || B <- Args]),
+  TotalLength = length(ConvertedArgs),
+
   ArgCount = [<<"*">>, ?i2l(TotalLength), <<"\r\n">>],
-  ArgBin = [[<<"$">>, ?i2l(iolist_size(A)), <<"\r\n">>, 
-             A, <<"\r\n">>] || A <- [erldis_binaries:to_binary(B) || B <- Args]],
+  ArgBin = [[<<"$">>, ?i2l(iolist_size(A)), <<"\r\n">>, A, <<"\r\n">>]
+            || A <- ConvertedArgs],
 
   [ArgCount, ArgBin].
 
