@@ -16,6 +16,7 @@
 ;(redis-cmd -b redis-return-bulk)
 ;(redis-cmd -m redis-return-multibulk)
 ;(redis-cmd -o redis-return-special)
+;(redis-cmd -i-tf redis-return-integer-true-false)
 
 (defsyntax redis-cmd-n
   ([command-name] (redis-cmd-mk command-name () redis-return-nil))
@@ -38,6 +39,9 @@
 (defsyntax redis-cmd-o
   ([command-name] (redis-cmd-mk command-name () redis-return-special))
   ([command-name command-args] (redis-cmd-mk command-name command-args redis-return-special)))
+(defsyntax redis-cmd-i-tf
+  ([command-name] (redis-cmd-mk command-name () redis-return-integer-true-false))
+  ([command-name command-args] (redis-cmd-mk command-name command-args redis-return-integer-true-false)))
 
 (defmacro return-type (name redis-cmds)
   `(defun ,(mk-a-return-type name) () ',redis-cmds))

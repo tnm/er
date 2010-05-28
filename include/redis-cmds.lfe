@@ -7,6 +7,7 @@
 ;; redis-cmd-b = bulk return
 ;; redis-cmd-m = multibulk return
 ;; redis-cmd-o = other/special return
+;; redis-cmd-i-tf = int return where 0 = false and 1 = true
 
 ;; Connection handling ;;
 
@@ -19,10 +20,12 @@
 ;; Commands operating on all the kind of values ;;
 
 ; test if a key exists
-(redis-cmd-i exists (_key_))
+; returns true on exists; false on not exists
+(redis-cmd-i-tf exists (_key_))
 
 ; delete a key
-(redis-cmd-i del (_key_))
+; returns number of keys deleted: 0 to N
+(redis-cmd-i del (_keys_))
 
 ; return the type of the value stored at key
 (redis-cmd-s type (_key_))
@@ -34,17 +37,21 @@
 (redis-cmd-l randomkey)
 
 ; rename the old key in the new one, destroing the newname key if it already exists
+; > er:rename(C, bob2, bob3).
+; ** exception throw: {erldis_return_status,<<"ERR no such key">>}
+; > er:rename(C, bob3, bob3).
+; ** exception throw: {erldis_return_status,<<"ERR source and destination objects are the same">>}
 (redis-cmd-s rename (_oldname_ _newname_))
 
 ; rename the old key in the new one, if the newname key does not already exist
-(redis-cmd-i renamenx (_oldname_ _newname_))
+(redis-cmd-i-tf renamenx (_oldname_ _newname_))
 
 ; return the number of keys in the current db
 (redis-cmd-i dbsize)
 
 ; set a time to live in seconds on a key
-(redis-cmd-i expire (_key_ _seconds-forward_))
-(redis-cmd-i expireat (_key_ _unixtime_))
+(redis-cmd-i-tf expire (_key_ _seconds-forward_))
+(redis-cmd-i-tf expireat (_key_ _unixtime_))
 
 ; get the time to live in seconds of a key
 (redis-cmd-i ttl (_key_))
@@ -113,10 +120,10 @@
 ;; Commands operating on lists ;;
 
 ; Append an element to the tail of the List value at key
-(redis-cmd-s rpush (_key_ _value_))
+(redis-cmd-i rpush (_key_ _value_))
 
 ; Append an element to the head of the List value at key
-(redis-cmd-s lpush (_key_ _value_))
+(redis-cmd-i lpush (_key_ _value_))
 
 ; Return the length of the List value at key
 (redis-cmd-i llen (_key_))
@@ -157,16 +164,16 @@
 ;; Commands operating on sets ;;
 
 ; Add the specified member to the Set value at key
-(redis-cmd-i sadd (_key_ _member_))
+(redis-cmd-i-tf sadd (_key_ _member_))
 
 ; Remove the specified member from the Set value at key
-(redis-cmd-i srem (_key_ _member_))
+(redis-cmd-i-tf srem (_key_ _member_))
 
 ; Remove and return (pop) a random element from the Set value at key
 (redis-cmd-b spop (_key_))
 
 ; Move the specified member from one Set to another atomically
-(redis-cmd-i smove (_srckey_ _dstkey_ _member_))
+(redis-cmd-i-tf smove (_srckey_ _dstkey_ _member_))
 
 ; Return the number of elements (the cardinality) of the Set at key
 (redis-cmd-i scard (_key_))
@@ -208,19 +215,21 @@
 ;; Commands operating on sorted sets (zsets, Redis version >= 1.1) ;;
 
 ; Add the specified member to the Sorted Set value at key or update the score if it already exist
-(redis-cmd-i zadd (_key_ _score_ _member_))
+(redis-cmd-i-tf zadd (_key_ _score_ _member_))
 
 ; Remove the specified member from the Sorted Set value at key
-(redis-cmd-i zrem (_key_ _member_))
+(redis-cmd-i-tf zrem (_key_ _member_))
 
 ; If the member already exists increment its score by _increment_, otherwise add the member setting _increment_ as score
 (redis-cmd-i zincrby (_key_ _increment_ _member_))
 
 ; Return the rank (or index) or _member_ in the sorted set at _key_, with scores being ordered from low to high
-(redis-cmd-b zrank (_key_ _member_))
+; NB: Docs say this returns bulk, but we treat it as returning an integer
+(redis-cmd-i zrank (_key_ _member_))
 
 ; Return the rank (or index) or _member_ in the sorted set at _key_, with scores being ordered from high to low
-(redis-cmd-b zrevrank (_key_ _member_))
+; NB: Docs say this returns bulk, but we treat it as returning an integer
+(redis-cmd-i zrevrank (_key_ _member_))
 
 ; Return a range of elements from the sorted set at key
 (redis-cmd-m zrange (_key_ _start_ _end_))
@@ -251,10 +260,14 @@
 ;; Commands operating on hashes ;;
 
 ; Set the hash field to the specified value. Creates the hash if needed.
-(redis-cmd-i hset (_key_ _field_ _value_))
+(redis-cmd-i-tf hset (_key_ _field_ _value_))
 
 ; Retrieve the value of the specified hash field.
 (redis-cmd-b hget (_key_ _field_))
+
+; Set the hash fields to their respective values.
+; _key1_ _field1_ ... _fieldN_
+(redis-cmd-m hmget (_key_ _fields_))
 
 ; Set the hash fields to their respective values.
 ; _key_ _field1_ _value1_ ... _fieldN_ _valueN_
@@ -264,10 +277,10 @@
 (redis-cmd-i hincrby (_key_ _field_ _integer_))
 
 ; Test for existence of a specified field in a hash
-(redis-cmd-i hexists (_key_ _field_))
+(redis-cmd-i-tf hexists (_key_ _field_))
 
 ; Remove the specified field from a hash
-(redis-cmd-i hdel (_key_ _field_))
+(redis-cmd-i-tf hdel (_key_ _field_))
 
 ; Return the number of items in a hash.
 (redis-cmd-i hlen (_key_))

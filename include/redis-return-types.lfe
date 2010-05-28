@@ -1,6 +1,10 @@
+
+;; create list of all return types available as (return-type::return-types)
 (return-type return-types
   (nil status integer single-line bulk multibulk special))
 
+;; create lists of functions with each return type
+;; available as (return-type::nil), (return-type::status), etc
 (return-type nil
   (quit))
 
@@ -34,19 +38,34 @@
   (subscribe unsubscribe psubscribe punsubscribe monitor))
 
 
+;; Functions for handling generic return types
 (defun redis-return-nil (x) x)
 
-(defun redis-return-status (x)
-  (list_to_atom (: string to_lower (binary_to_list x))))
+(defun redis-return-status 
+  ([((tuple 'error bin))] (throw (tuple 'redis_return_status bin)))
+  ([(x)]
+    ; we trust redis to have a stable list of return atoms
+    (list_to_atom (: string to_lower (binary_to_list x)))))
 
-(defun redis-return-integer (x)
-  (list_to_integer (binary_to_list x)))
+(defun redis-return-integer 
+  ([(#b(105 110 102))] 'inf)     ; <<"inf">>
+  ([(#b(45 105 110 102))] '-inf) ; <<"-inf">>
+  ([(#b(110 97 110))] 'nan)      ; <<"nan">>
+  ([('nil)] 'nil)
+  ([(x)]
+    (list_to_integer (binary_to_list x))))
 
-(defun redis-return-single-line (x) x)
+(defun redis-return-single-line
+  ([(x)] x))
 
 (defun redis-return-bulk (x) x)
 
 (defun redis-return-multibulk (x) x)
 
 (defun redis-return-special (x) x)
+
+;; Functions for handling more specialized return types
+(defun redis-return-integer-true-false
+    ([(#b(48))] 'false)  ; <<"0">>
+    ([(#b(49))] 'true))  ; <<"1">>
 
