@@ -5,7 +5,7 @@
 	{mod, {erldis_app, []}},
 	{applications, [kernel, stdlib]},
 	{modules, [
-		er, erp, erldis_client, erldis, erldis_proto, erldis_app, erldis_sup,
+		er, erp, er_server, erldis_client, erldis, erldis_proto, erldis_app, erldis_sup,
 		erldis_sets, erldis_dict, erldis_list, gen_server2, erldis_sync_client,
 		erldis_binaries
 	]},
