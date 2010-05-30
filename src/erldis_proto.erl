@@ -4,7 +4,7 @@
 
 parse(empty, <<"-", Message/binary>>) ->
     {error, Message};
-parse(empty, <<"$-1">>) ->
+parse(_, <<"$-1">>) ->
     {read, nil};
 parse(empty, <<"*-1">>) ->
     {hold, nil};
