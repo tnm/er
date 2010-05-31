@@ -56,6 +56,7 @@
     (list_to_integer (binary_to_list x))))
 
 (defun redis-return-single-line
+  ([()] #b())
   ([(x)] x))
 
 (defun redis-return-bulk (x) x)
