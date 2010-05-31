@@ -211,7 +211,11 @@ er_hashes_commands_test_() ->
         ?_E([<<"fieldA">>, <<"valueA1">>,
              <<"fieldB">>, <<"valueB">>,
              <<"fieldC">>, <<"valueC">>],
-                   er:hgetall(C, hashA))
+                   er:hgetall(C, hashA)),
+        ?_E(ok,    er:hmset(C, hashHasEmpty, [fieldA, valA, fieldB, <<"">>])),
+        ?_E([<<"fieldA">>, <<"valA">>,
+             <<"fieldB">>, <<"">>],
+                   er:hgetall(C, hashHasEmpty))
       ]
     end
   }.
