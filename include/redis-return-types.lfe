@@ -48,9 +48,9 @@
     (list_to_atom (: string to_lower (binary_to_list x)))))
 
 (defun redis-return-integer 
-  ([(#b(105 110 102))] 'inf)     ; <<"inf">>
-  ([(#b(45 105 110 102))] '-inf) ; <<"-inf">>
-  ([(#b(110 97 110))] 'nan)      ; <<"nan">>
+  ([(#b("inf"))] 'inf)
+  ([(#b("-inf"))] '-inf)
+  ([(#b("nan"))] 'nan)
   ([('nil)] 'nil)
   ([(x)]
     (list_to_integer (binary_to_list x))))
@@ -67,6 +67,6 @@
 
 ;; Functions for handling more specialized return types
 (defun redis-return-integer-true-false
-    ([(#b(48))] 'false)  ; <<"0">>
-    ([(#b(49))] 'true))  ; <<"1">>
+    ([(#b("0"))] 'false)  ; <<"0">>
+    ([(#b("1"))] 'true))  ; <<"1">>
 
