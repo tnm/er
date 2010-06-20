@@ -179,7 +179,7 @@
 (redis-cmd-i scard (_key_))
 
 ; Test if the specified value is a member of the Set at key
-(redis-cmd-i sismember (_key_ _member_))
+(redis-cmd-i-tf sismember (_key_ _member_))
 
 ; Return the intersection between the Sets stored at key1, key2, ..., keyN
 ; _key1_ _key2_ ... _keyN_

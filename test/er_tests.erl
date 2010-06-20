@@ -123,8 +123,9 @@ er_sets_commands_test_() ->
         ?_E(false, er:smove(C, setB, setA, bmembernone)),
         ?_E(true,  er:smove(C, setB, setA, bmember1)),
         ?_E(1,     er:scard(C, setA)),
-        ?_E(2,     er:scard(C, setB))
-        % sismember
+        ?_E(2,     er:scard(C, setB)),
+        ?_E(true,  er:sismember(C, setB, bmember2)),
+        ?_E(false,  er:sismember(C, setB, bmember9))
         % sinter
         % sinterstore
         % sunion
