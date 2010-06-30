@@ -12,7 +12,7 @@
         (,wrapper-fun-name
           (: gen_server call gen-server-name
             (tuple 'cmd
-              (: erldis multibulk_cmd (list ,cmd ,@command-args))))))))
+              (list ,cmd ,@command-args)))))))
 
 (include-file "include/redis-return-types.lfe")
 (include-file "include/redis-cmds.lfe")
@@ -28,7 +28,7 @@
 
 (defun init
   ([(tuple ip port)]
-    (case (: erldis connect ip port)
+    (case (: er_redis connect ())
       ((tuple 'ok connection) (tuple 'ok (make-state cxn connection))))))
 
 (defun handle_call
@@ -36,7 +36,7 @@
     (let* ((cxn (state-cxn state)))
       (spawn (lambda ()
         (: gen_server reply from
-          (: erldis_client send cxn cmd-list 2000)))))
+          (: er_redis q cxn cmd-list)))))
     (tuple 'noreply state)))
  
  (defun handle_cast (_request state)

@@ -9,8 +9,10 @@
 (defmacro redis-cmd-mk (command-name command-args wrapper-fun-name)
     (let* ((cmd (b command-name)))
      `(defun ,command-name (,@command-args)
-        (,wrapper-fun-name (: erldis_client send client
-          (: erldis multibulk_cmd (list ,cmd ,@command-args)) 2000)))))
+        (,wrapper-fun-name (: er_redis q client (list ,cmd ,@command-args))))))
 
 (include-file "include/redis-return-types.lfe")
 (include-file "include/redis-cmds.lfe")
+
+(defun er_next ()
+  (redis-return-strip-ok (: gen_server call client 'next 'infinity)))

@@ -5,19 +5,24 @@
 -define(_E(A, B), ?_assertEqual(A, B)).
 
 redis_setup_clean() ->
-  {ok, Cxn} = erldis:connect(),
+  TestModule = er_redis,
+  {ok, Cxn} = TestModule:start_link(),
   ok = er:flushall(Cxn),
   Cxn.
+
+redis_cleanup(Cxn) ->
+  Cxn ! shutdown.
 
 er_basic_commands_test_() ->
   {setup,
     fun redis_setup_clean/0,
+    fun redis_cleanup/1,
     fun(C) -> 
       [
         ?_E(false, er:exists(C, existing)),
         ?_E(ok,    er:set(C, existing, ralph)),
         ?_E(true,  er:exists(C, existing)),
-        ?_E([<<"ralph">>], er:get(C, existing)),
+        ?_E(<<"ralph">>, er:get(C, existing)),
         ?_E(1,     er:del(C, existing)),
         ?_E(0,     er:del(C, existing)),
         ?_E(false, er:exists(C, existing)),
@@ -25,7 +30,7 @@ er_basic_commands_test_() ->
         ?_E(nil,   er:randomkey(C)),
         ?_E(ok,    er:set(C, <<>>, ralph)),
         ?_E(<<>>,  er:randomkey(C)),
-        ?_E([<<"ralph">>], er:get(C, <<>>)),
+        ?_E(<<"ralph">>, er:get(C, <<>>)),
         ?_E(1,     er:del(C, <<>>)),
         ?_assertException(throw,
           {redis_return_status, <<"ERR no such key">>},
@@ -67,6 +72,7 @@ er_basic_commands_test_() ->
 er_lists_commands_test_() ->
   {setup,
     fun redis_setup_clean/0,
+    fun redis_cleanup/1,
     fun(C) -> 
       [
         % []
@@ -102,6 +108,7 @@ er_lists_commands_test_() ->
 er_sets_commands_test_() ->
   {setup,
     fun redis_setup_clean/0,
+    fun redis_cleanup/1,
     fun(C) -> 
       [
         ?_E(true,  er:sadd(C, setA, amember1)),
@@ -110,11 +117,11 @@ er_sets_commands_test_() ->
         ?_E(true,  er:sadd(C, setA, amember3)),
         ?_E(true,  er:srem(C, setA, amember1)),
         ?_E(false, er:srem(C, setA, amember1)),
-        ?_assertMatch([M] when M =:= <<"amember2">> orelse M =:= <<"amember3">>,
+        ?_assertMatch(M when M =:= <<"amember2">> orelse M =:= <<"amember3">>,
           er:spop(C, setA)),
-        ?_assertMatch([M] when M =:= <<"amember2">> orelse M =:= <<"amember3">>,
+        ?_assertMatch(M when M =:= <<"amember2">> orelse M =:= <<"amember3">>,
           er:spop(C, setA)),
-        ?_E([nil], er:spop(C, setA)),
+        ?_E(nil,   er:spop(C, setA)),
         ?_E(0,     er:scard(C, setA)),
         ?_E(true,  er:sadd(C, setB, bmember1)),
         ?_E(true,  er:sadd(C, setB, bmember2)),
@@ -141,6 +148,7 @@ er_sets_commands_test_() ->
 er_sorted_sets_commands_test_() ->
   {setup,
     fun redis_setup_clean/0,
+    fun redis_cleanup/1,
     fun(C) -> 
       [
         ?_E(true,  er:zadd(C, zsetA, 10, amember1)),
@@ -179,14 +187,15 @@ er_sorted_sets_commands_test_() ->
 er_hashes_commands_test_() ->
   {setup,
     fun redis_setup_clean/0,
+    fun redis_cleanup/1,
     fun(C) -> 
       [
         ?_E(true,  er:hset(C, hashA, fieldA, valueA)),
         ?_E(true,  er:hset(C, hashA, fieldB, valueB)),
         ?_E(true,  er:hset(C, hashA, fieldC, valueC)),
         ?_E(false, er:hset(C, hashA, fieldA, valueA1)),
-        ?_E([<<"valueA1">>], er:hget(C, hashA, fieldA)),
-        ?_E([nil],   er:hget(C, hashB, fieldZ)),
+        ?_E(<<"valueA1">>, er:hget(C, hashA, fieldA)),
+        ?_E(nil,   er:hget(C, hashB, fieldZ)),
         ?_E([nil, <<"valueA1">>, <<"valueC">>],
                      er:hmget(C, hashA, [fieldNone, fieldA, fieldC])),
         ?_E([<<"valueA1">>, <<"valueC">>, nil],
@@ -199,8 +208,8 @@ er_hashes_commands_test_() ->
                      er:hmget(C, hashA, [fieldA, fieldC])),
         ?_E([nil], er:hmget(C, hashNone, [fieldNothing])),
         ?_E(ok,    er:hmset(C, hashC, [fieldA, valA, fieldB, valB])),
-        ?_E([<<"valA">>], er:hget(C, hashC, fieldA)),
-        ?_E([<<"valB">>], er:hget(C, hashC, fieldB)),
+        ?_E(<<"valA">>, er:hget(C, hashC, fieldA)),
+        ?_E(<<"valB">>, er:hget(C, hashC, fieldB)),
         ?_E(12,    er:hincrby(C, hashD, fieldAddr, 12)),
         ?_E(72,    er:hincrby(C, hashD, fieldAddr, 60)),
         ?_E(true,  er:hexists(C, hashD, fieldAddr)), 
@@ -228,6 +237,7 @@ er_hashes_commands_test_() ->
 er_sorting_commands_test_() ->
   {setup,
     fun redis_setup_clean/0,
+    fun redis_cleanup/1,
     fun(_C) -> 
       [
         % sort
@@ -238,6 +248,7 @@ er_sorting_commands_test_() ->
 er_transactions_commands_test_() ->
   {setup,
     fun redis_setup_clean/0,
+    fun redis_cleanup/1,
     fun(_C) -> 
       [
         % multi
@@ -252,6 +263,7 @@ er_transactions_commands_test_() ->
 er_pubsub_commands_test_() ->
   {setup,
     fun redis_setup_clean/0,
+    fun redis_cleanup/1,
     fun(_C) -> 
       [
         % subscribe
@@ -266,6 +278,7 @@ er_pubsub_commands_test_() ->
 er_persistence_commands_test_() ->
   {setup,
     fun redis_setup_clean/0,
+    fun redis_cleanup/1,
     fun(_C) -> 
       [
         % save
@@ -280,6 +293,7 @@ er_persistence_commands_test_() ->
 er_server_control_commands_test_() ->
   {setup,
     fun redis_setup_clean/0,
+    fun redis_cleanup/1,
     fun(_C) -> 
       [
         % info
@@ -296,7 +310,7 @@ er_return_test_() ->
       ?_E(nil,      er:'redis-return-nil'(nil)),
       ?_E(ok,       er:'redis-return-status'([<<"ok">>])),
       ?_assertException(throw, {redis_return_status, <<"throwed">>},
-        er:'redis-return-status'([{error, <<"throwed">>}])),
+        er:'redis-return-status'({error, <<"throwed">>})),
       ?_E(53,       er:'redis-return-integer'([<<"53">>])),
       ?_E(inf,      er:'redis-return-integer'([<<"inf">>])),
       ?_E('-inf',   er:'redis-return-integer'([<<"-inf">>])),

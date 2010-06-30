@@ -42,8 +42,10 @@
 (defun redis-return-nil (x) x)
 
 (defun redis-return-status 
-  ([((tuple 'error bin))] (throw (tuple 'redis_return_status bin)))
-  ([(x)]
+  ([(tuple 'error bin)] (throw (tuple 'redis_return_status bin)))
+  ([x] (when (is_binary x))
+    (list_to_atom (: string to_lower (binary_to_list x))))
+  ([(x)] (when (is_binary x))
     ; we trust redis to have a stable list of return atoms
     (list_to_atom (: string to_lower (binary_to_list x)))))
 
@@ -51,22 +53,41 @@
   ([(#b("inf"))] 'inf)
   ([(#b("-inf"))] '-inf)
   ([(#b("nan"))] 'nan)
-  ([('nil)] 'nil)
-  ([(x)]
-    (list_to_integer (binary_to_list x))))
+  ([x] (when (is_integer x)) x)
+  ([(tuple 'ok x)] (when (is_integer x)) x)
+  ([(tuple 'ok #b("inf"))] 'inf)
+  ([(tuple 'ok #b("-inf"))] '-inf)
+  ([(tuple 'ok #b("nan"))] 'nan)
+  ([(tuple 'ok x)] (when (is_binary x)) (list_to_integer (binary_to_list x)))
+  ([(x)] (when (is_binary x)) (list_to_integer (binary_to_list x))))
 
 (defun redis-return-single-line
   ([()] #b())
+  ([(tuple 'ok value)] value)
   ([(x)] x))
 
-(defun redis-return-bulk (x) x)
+(defun redis-return-bulk
+  ([(tuple 'ok value)] value)
+  ([x] x))
 
-(defun redis-return-multibulk (x) x)
+(defun redis-return-multibulk 
+  ([(tuple 'ok 'nil)] 'nil)
+  ([x] (when (is_atom x)) x)
+  ([x] (when (is_list x)) (element 2 (: lists unzip x))))
+
+(defun redis-return-strip-ok
+  ([()] ())
+  ([(tuple pid retval)] (when (is_pid pid)) (tuple pid (redis-return-strip-ok retval)))
+  ([((tuple 'ok #b("message")) . xs)] (cons 'message (redis-return-strip-ok xs)))
+  ([((tuple 'ok #b("subscribe")) . xs)] (cons 'subscribe (redis-return-strip-ok xs)))
+  ([((tuple 'ok value) . xs)] (cons value (redis-return-strip-ok xs)))
+  ([(x . xs)] (cons x (redis-return-strip-ok xs))))
 
 (defun redis-return-special (x) x)
 
 ;; Functions for handling more specialized return types
 (defun redis-return-integer-true-false
-    ([(#b("0"))] 'false)  ; <<"0">>
-    ([(#b("1"))] 'true))  ; <<"1">>
-
+    ([0] 'false)          ; er_redis converts some things to ints
+    ([(#b("0"))] 'false)  ; and others it leaves in binaries
+    ([1] 'true)
+    ([(#b("1"))] 'true))

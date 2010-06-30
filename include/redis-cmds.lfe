@@ -38,9 +38,9 @@
 
 ; rename the old key in the new one, destroing the newname key if it already exists
 ; > er:rename(C, bob2, bob3).
-; ** exception throw: {erldis_return_status,<<"ERR no such key">>}
+; ** exception throw: {redis_return_status,<<"ERR no such key">>}
 ; > er:rename(C, bob3, bob3).
-; ** exception throw: {erldis_return_status,<<"ERR source and destination objects are the same">>}
+; ** exception throw: {redis_return_status,<<"ERR source and destination objects are the same">>}
 (redis-cmd-s rename (_oldname_ _newname_))
 
 ; rename the old key in the new one, if the newname key does not already exist
@@ -311,13 +311,13 @@
 ;; Publish/Subscribe  ;;
 
 ; Redis Public/Subscribe messaging paradigm implementation
-(redis-cmd-o subscribe (_channels_))
+(redis-cmd-strip subscribe (_channels_))
 (redis-cmd-o unsubscribe (_channels_))
 (redis-cmd-o unsubscribe)
-(redis-cmd-o psubscribe (_channel-patterns_))
+(redis-cmd-strip psubscribe (_channel-patterns_))
 (redis-cmd-o punsubscribe (_channel-patterns_))
 (redis-cmd-o punsubscribe)
-(redis-cmd-o publish (_channel_ _msg_))
+(redis-cmd-i publish (_channel_ _msg_))
 
 ;; Persistence control commands ;;
 

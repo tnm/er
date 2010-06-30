@@ -39,6 +39,9 @@
 (defsyntax redis-cmd-o
   ([command-name] (redis-cmd-mk command-name () redis-return-special))
   ([command-name command-args] (redis-cmd-mk command-name command-args redis-return-special)))
+(defsyntax redis-cmd-strip
+  ([command-name] (redis-cmd-mk command-name () redis-return-strip-ok))
+  ([command-name command-args] (redis-cmd-mk command-name command-args redis-return-strip-ok)))
 (defsyntax redis-cmd-i-tf
   ([command-name] (redis-cmd-mk command-name () redis-return-integer-true-false))
   ([command-name command-args] (redis-cmd-mk command-name command-args redis-return-integer-true-false)))
