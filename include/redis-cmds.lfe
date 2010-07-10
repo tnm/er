@@ -240,6 +240,9 @@
 ; Return all the elements with score >= min and score <= max (a range query) from the sorted set
 (redis-cmd-m zrangebyscore (_key_ _min_ _max_))
 
+; Count the number of elements of a sorted set with a score that lays within a given interval
+(redis-cmd-i zcount (_key_ _lower_score_ _upper_score_))
+
 ; Return the cardinality (number of elements) of the sorted set at key
 (redis-cmd-i zcard (_key_))
 
