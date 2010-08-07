@@ -53,6 +53,9 @@
 (redis-cmd-i-tf expire (_key_ _seconds-forward_))
 (redis-cmd-i-tf expireat (_key_ _unixtime_))
 
+; remove a previously set expire
+(redis-cmd-i-tf persist (_key_))
+
 ; get the time to live in seconds of a key
 (redis-cmd-i ttl (_key_))
 
@@ -116,6 +119,8 @@
 ; return a substring out of a larger string
 (redis-cmd-b substr (_key_ _start_ _end_))
 
+; return the length of a string
+(redis-cmd-i strlen (_key_))
 
 ;; Commands operating on lists ;;
 
