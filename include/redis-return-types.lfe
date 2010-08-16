@@ -67,6 +67,7 @@
   ([(x)] x))
 
 (defun redis-return-bulk
+  ([((tuple 'ok value) . xs)] (cons value (redis-return-bulk xs)))
   ([(tuple 'ok value)] value)
   ([x] x))
 
