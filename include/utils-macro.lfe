@@ -36,6 +36,12 @@
 (defsyntax redis-cmd-m
   ([command-name] (redis-cmd-mk command-name () redis-return-multibulk))
   ([command-name command-args] (redis-cmd-mk command-name command-args redis-return-multibulk)))
+(defsyntax redis-cmd-m-pl
+  ([fun-name command-name] (redis-cmd-mk fun-name command-name () redis-return-multibulk-pl))
+  ([fun-name command-name command-args] (redis-cmd-mk fun-name command-name command-args redis-return-multibulk-pl)))
+(defsyntax redis-cmd-m-kl
+  ([fun-name command-name] (redis-cmd-mk fun-name command-name () redis-return-multibulk-kl))
+  ([fun-name command-name command-args] (redis-cmd-mk fun-name command-name command-args redis-return-multibulk-kl)))
 (defsyntax redis-cmd-o
   ([command-name] (redis-cmd-mk command-name () redis-return-special))
   ([command-name command-args] (redis-cmd-mk command-name command-args redis-return-special)))

@@ -71,6 +71,20 @@
   ([(tuple 'ok value)] value)
   ([x] x))
 
+(defun to-proplist
+  ([()] '())
+  ([(a b . xs)] (cons (tuple (binary_to_atom a 'utf8) b) (to-proplist xs))))
+
+(defun to-keylist
+  ([()] '())
+  ([(a b . xs)] (cons (tuple a b) (to-keylist xs))))
+
+(defun redis-return-multibulk-pl (x)
+  (to-proplist (redis-return-multibulk x)))
+
+(defun redis-return-multibulk-kl (x)
+  (to-keylist (redis-return-multibulk x)))
+
 (defun redis-return-multibulk 
   ([(tuple 'ok 'nil)] 'nil)
   ([x] (when (is_atom x)) x)

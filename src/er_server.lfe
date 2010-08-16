@@ -6,13 +6,21 @@
 
 (include-file "include/utils-macro.lfe")
 
-(defmacro redis-cmd-mk (command-name command-args wrapper-fun-name)
+(defmacro redis-cmd-mk
+  ((command-name command-args wrapper-fun-name)
     (let* ((cmd (b command-name)))
      `(defun ,command-name (gen-server-name ,@command-args)
         (,wrapper-fun-name
           (: gen_server call gen-server-name
             (tuple 'cmd
               (list ,cmd ,@command-args)))))))
+  ((fun-name command-name command-args wrapper-fun-name)
+    (let* ((cmd (b command-name)))
+     `(defun ,fun-name (gen-server-name ,@command-args)
+        (,wrapper-fun-name
+          (: gen_server call gen-server-name
+            (tuple 'cmd
+              (list ,cmd ,@command-args))))))))
 
 (include-file "include/redis-return-types.lfe")
 (include-file "include/redis-cmds.lfe")

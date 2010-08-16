@@ -302,6 +302,12 @@
 ; Return all the fields and associated values in a hash.
 (redis-cmd-m hgetall (_key_))
 
+;; ER-ONLY functions.
+; Return all the fields of a hash as a proplist (e.g. [{atom, Binary}])
+(redis-cmd-m-pl hgetall_p hgetall (_key_))
+; Return all the fields of a hash as a keylist (e.g. [{Binary, Binary}])
+(redis-cmd-m-kl hgetall_k hgetall (_key_))
+;; END ER_ONLY functions.
 
 ;; Sorting ;;
 

@@ -227,6 +227,14 @@ er_hashes_commands_test_() ->
              <<"fieldB">>, <<"valueB">>,
              <<"fieldC">>, <<"valueC">>],
                    er:hgetall(C, hashA)),
+        ?_E([{fieldA, <<"valueA1">>},
+             {fieldB, <<"valueB">>},
+             {fieldC, <<"valueC">>}],
+                   er:hgetall_p(C, hashA)),
+        ?_E([{<<"fieldA">>, <<"valueA1">>},
+             {<<"fieldB">>, <<"valueB">>},
+             {<<"fieldC">>, <<"valueC">>}],
+                   er:hgetall_k(C, hashA)),
         ?_E(ok,    er:hmset(C, hashHasEmpty, [fieldA, valA, fieldB, <<"">>])),
         ?_E([<<"fieldA">>, <<"valA">>,
              <<"fieldB">>, <<"">>],
@@ -318,9 +326,22 @@ er_return_test_() ->
       ?_E(<<"ok">>, er:'redis-return-single-line'([<<"ok">>])),
       ?_E(ok,       er:'redis-return-bulk'(ok)),
       ?_E(ok,       er:'redis-return-multibulk'(ok)),
+      ?_E(nil,      er:'redis-return-multibulk'({ok, nil})),
       ?_E(ok,       er:'redis-return-special'(ok)),
       ?_E(true,     er:'redis-return-integer-true-false'([<<"1">>])),
-      ?_E(false,    er:'redis-return-integer-true-false'([<<"0">>]))
+      ?_E(false,    er:'redis-return-integer-true-false'([<<"0">>])),
+      ?_E([],       er:'redis-return-multibulk-pl'([])),
+      ?_E([],       er:'redis-return-multibulk-kl'([])),
+      ?_E([{hello, <<"ok">>}],
+        er:'redis-return-multibulk-pl'([{ok, <<"hello">>}, {ok, <<"ok">>}])),
+      ?_E([{hello, <<"ok">>}, {hello2, <<"ok2">>}],
+        er:'redis-return-multibulk-pl'([{ok, <<"hello">>}, {ok, <<"ok">>},
+                                        {ok, <<"hello2">>}, {ok, <<"ok2">>}])),
+      ?_E([{<<"hello">>, <<"ok">>}],
+        er:'redis-return-multibulk-kl'([{ok, <<"hello">>}, {ok, <<"ok">>}])),
+      ?_E([{<<"hello">>, <<"ok">>}, {<<"hello2">>, <<"ok2">>}],
+        er:'redis-return-multibulk-kl'([{ok, <<"hello">>}, {ok, <<"ok">>},
+                                        {ok, <<"hello2">>}, {ok, <<"ok2">>}]))
     ]
   }.
 
