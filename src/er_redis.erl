@@ -192,6 +192,7 @@ multibulk_cmd(Args) when is_binary(Args) ->
 to_binary(X) when is_binary(X)  -> X;
 % Basic determination of a char list: "abc"
 to_binary(X) when is_list(X) andalso is_integer(hd(X)) -> list_to_binary(X);
+to_binary([])                   -> <<"">>;
 % Basic determination of a list of stuff: [abc, def, <<"other">>, 12]
 to_binary(X) when is_list(X)    -> [to_binary(A) || A <- X];
 to_binary(X) when is_atom(X)    -> atom_to_binary(X, utf8);

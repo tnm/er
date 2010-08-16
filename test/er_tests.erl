@@ -207,6 +207,7 @@ er_hashes_commands_test_() ->
         ?_E([<<"valueA1">>, <<"valueC">>],
                      er:hmget(C, hashA, [fieldA, fieldC])),
         ?_E([nil], er:hmget(C, hashNone, [fieldNothing])),
+        ?_E(ok,    er:hmset(C, hashC, [fieldA, [], fieldB, valB])),
         ?_E(ok,    er:hmset(C, hashC, [fieldA, valA, fieldB, valB])),
         ?_E(<<"valA">>, er:hget(C, hashC, fieldA)),
         ?_E(<<"valB">>, er:hget(C, hashC, fieldB)),
