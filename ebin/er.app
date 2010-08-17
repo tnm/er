@@ -10,6 +10,7 @@
              er_server,
              er_sup,
              erp,
+             eru,
 
              % Brought in from redis-erl
              er_redis
