@@ -170,9 +170,13 @@ er_sorted_sets_commands_test_() ->
 %        ?_E(nan,   er:zincrby(C, zsetA, "-inf", amember1)),
 %        ?_E(nan, er:zincrby(C, zsetA, "-inf", amember1)),  % crashes redis
         ?_E(1,    er:zrank(C, zsetA, amember1)),  % at position inf, it moves up
-        ?_E(0,    er:zrank(C, zsetA, amember2))
-        % zrange
-        % zrevrange
+        ?_E(0,    er:zrank(C, zsetA, amember2)),
+        ?_E([<<"amember2">>, <<"amember1">>], er:zrange(C, zsetA, 0, 3)),
+        ?_E([{<<"amember2">>, <<"10">>},
+             {<<"amember1">>, <<"inf">>}], er:zrange(C, zsetA, 0,3,withscores)),
+        ?_E([<<"amember1">>, <<"amember2">>], er:zrevrange(C, zsetA, 0, 3)),
+        ?_E([{<<"amember1">>, <<"inf">>},
+             {<<"amember2">>, <<"10">>}], er:zrevrange(C,zsetA,0,3,withscores))
         % zrangebyscore
         % zcard
         % zscore

@@ -260,6 +260,12 @@
 ; Remove all the elements with score >= min and score <= max from the sorted set
 (redis-cmd-i zremrangebyscore (_key_ _min_ _max_))
 
+;; ER-ONLY functions.
+(redis-cmd-m-kl zrange zrange (_key_ _start_ _end_ withscores))
+(redis-cmd-m-kl zrevrange zrevrange (_key_ _start_ _end_ withscores))
+(redis-cmd-m-kl zrangebyscore zrangebyscore (_key_ _min_ _max_ withscores))
+;; END ER_ONLY functions.
+
 ; Perform a union or intersection over a number of sorted sets with optional weight and aggregate`
 ; _dstkey_ _N_ _key1_ ... _keyN_ WEIGHTS _w1_ ... _wN_ AGGREGATE SUM|MIN|MAX
 (redis-cmd-i zunionstore (_dstkey_ _n_ _key-spec_))

@@ -1,7 +1,7 @@
 {application, er,
  [
   {description, "Erlang Redis Library Application"},
-  {vsn, "0.2.5"},
+  {vsn, "0.3.5"},
   {modules, [
              % new, good, er modules
              er,
