@@ -88,7 +88,7 @@
 (redis-cmd-m mget (_keys_))
 
 ; set a key to a string value if the key does not exist
-(redis-cmd-i setnx (_key_ _value_))
+(redis-cmd-i-tf setnx (_key_ _value_))
 
 ; Set+Expire combo command
 (redis-cmd-s setex (_key_ _time_ _value_))
@@ -99,7 +99,7 @@
 
 ; set a multiple keys to multiple values in a single atomic operation if none of the keys already exist
 ; _key1_ _value1_ _key2_ _value2_ ... _keyN_ _valueN_
-(redis-cmd-i msetnx (_key-value-pairs_))
+(redis-cmd-i-tf msetnx (_key-value-pairs_))
 
 ; increment the integer value of key
 (redis-cmd-i incr (_key_))
