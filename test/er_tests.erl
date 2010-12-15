@@ -47,26 +47,80 @@ er_basic_commands_test_() ->
         ?_E(2,     er:dbsize(C)),
         ?_E(ok,    er:set(C, expireme, expiremecontent)),
         ?_E(true,  er:expire(C, expireme, 30)),
-        ?_E(false, er:expire(C, expireme, 30)),
+        ?_E(true,  er:expire(C, expireme, 30)),  % behavior changed in redis 2.2
         ?_E(false, er:expire(C, expireme_noexist, 30)),
         ?_assertMatch(TTL when TTL =:= 29 orelse TTL =:= 30,
           er:ttl(C, expireme)),
         ?_E(true,  er:setnx(C, abc123, abc)),
-        ?_E(false,  er:setnx(C, abc123, abc)),
-        ?_E(false,  er:msetnx(C, [abc123, abc, abc234, def])),
-        ?_E(true,  er:msetnx(C, [abc234, def, abc567, hij]))
+        ?_E(false, er:setnx(C, abc123, abc)),
+        ?_E(false, er:msetnx(C, [abc123, abc, abc234, def])),
+        ?_E(true,  er:msetnx(C, [abc234, def, abc567, hij])),
         % getset,
         % mget,
         % setex,
-        % ttl,
-        % ttl,
         % mset,
         % incr,
         % incrby,
         % decr,
         % decrby,
         % append,
-        % substr,
+
+        % bitkey: 01000000 = @
+        ?_E(true,    er:setbit(C, bitkey, 1, 1)),
+        ?_E(<<"@">>, er:get(C, bitkey)),
+        ?_E(1, er:getbit(C, bitkey, 1)),
+        ?_E(0, er:getbit(C, bitkey, 0)),
+        ?_E(0, er:getbit(C, bitkey, 12)),
+        ?_E(0, er:getbit(C, bitkey, 32)),
+        ?_E(0, er:getbit(C, bitkey, 64)),
+        ?_E(0, er:getbit(C, bitkey, 999)),
+        % test setting arbitrarily large index
+        ?_E(true, er:setbit(C, bitkey, 1024968, 1)),
+        ?_E(0, er:getbit(C, bitkey, 1024967)),
+        ?_E(1, er:getbit(C, bitkey, 1024968)),
+        ?_E(0, er:getbit(C, bitkey, 1024969)),
+        % binarykey
+        ?_E(true, er:setbit(C, binarykey, 0, 1)),
+        % 10000000 = 128
+        ?_E(<<128>>, er:get(C, binarykey)),
+        ?_E(true,    er:setbit(C, binarykey, 7, 1)),
+        % 10000001 = 128
+        ?_E(<<129>>, er:get(C, binarykey)),
+        ?_E(true,    er:setbit(C, binarykey, 64, 1)),
+        % binarykey = (see next three lines)
+        % [10000001]
+        % [00000000][00000000][00000000][00000000][00000000][00000000][00000000]
+        % [1000000]
+        % = 129, 8x0, 8x0, 8x0, 8x0, 8x0, 8x0, 8x0, 128
+        ?_E(<<129,0,0,0,0,0,0,0,128>>, er:get(C, binarykey)),
+        % binaryint
+        % 5 = 00000101
+        % *NB:* Binary 5 is not the same as ASCII 5.
+        ?_E(ok,er:set(C, binaryint, <<5>>)),
+        ?_E(0, er:getbit(C, binaryint, 0)),
+        ?_E(0, er:getbit(C, binaryint, 1)),
+        ?_E(0, er:getbit(C, binaryint, 2)),
+        ?_E(0, er:getbit(C, binaryint, 3)),
+        ?_E(0, er:getbit(C, binaryint, 4)),
+        ?_E(1, er:getbit(C, binaryint, 5)),
+        ?_E(0, er:getbit(C, binaryint, 6)),
+        ?_E(1, er:getbit(C, binaryint, 7)),
+        % nothinghere.  substr got renamed getrange in redis 2.2
+        % getrange is now just an alias to substr in redis
+        ?_E(nil, er:getrange(C, nothinghere, 1, 3)),
+        ?_E(nil, er:substr(C, nothinghere, 1, 3)),
+        % rangekey tests
+        ?_E(ok,  er:set(C, rangekey, "Hello")),
+        ?_E(<<"ell">>, er:getrange(C, rangekey, 1, 3)),
+        ?_E(<<"ell">>, er:substr(C, rangekey, 1, 3)),
+        ?_E(5, er:setrange(C, rangekey, 1, "no")),
+        ?_E(<<"nolo">>, er:getrange(C, rangekey, 1, 4)),
+        % zero padding happens when adding to a nonexistent key
+        ?_E(13, er:setrange(C, rangeemptykey, 3, "Empty Test")),
+        ?_E(<<0,0,0,"Empty Test">>, er:get(C, rangeemptykey)),
+        % reading past the length of a string
+        ?_E(nil, er:getrange(C, rangekey, 64, 32)),
+        ?_E(nil, er:substr(C, rangekey, 64, 32))
       ]
     end
   }.
@@ -103,6 +157,7 @@ er_lists_commands_test_() ->
         % blpop
         % brpop
         % rpoplpush
+        % brpoplpush
       ]
     end
   }.
@@ -134,7 +189,7 @@ er_sets_commands_test_() ->
         ?_E(1,     er:scard(C, setA)),
         ?_E(2,     er:scard(C, setB)),
         ?_E(true,  er:sismember(C, setB, bmember2)),
-        ?_E(false,  er:sismember(C, setB, bmember9))
+        ?_E(false, er:sismember(C, setB, bmember9))
         % sinter
         % sinterstore
         % sunion

@@ -171,7 +171,7 @@ read_body(Socket, Size) ->
 read_multi_bulk(_Data, 0, Acc) ->
   lists:reverse(Acc);
 read_multi_bulk(_Data, -1, _Acc) ->
-  {ok, nil};  % Occurs during b[lr]pop
+  {ok, nil};  % Occurs during b[lr]pop.  Maybe during brpoplpush too
 read_multi_bulk(Socket, Count, Acc) when Count > 0 ->
   Acc1 = [read_resp(Socket) | Acc],
   read_multi_bulk(Socket, Count-1, Acc1).

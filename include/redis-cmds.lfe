@@ -117,7 +117,12 @@
 (redis-cmd-i append (_key_ _value_))
 
 ; return a substring out of a larger string
-(redis-cmd-b substr (_key_ _start_ _end_))
+(redis-cmd-b substr (_key_ _start_ _end_))   ; substr = getrange in 2.2+
+(redis-cmd-b getrange (_key_ _start_ _end_)) ; getrange = substr for redis 2.2+
+(redis-cmd-i setrange (_key_ _start_ _end_))
+
+(redis-cmd-i getbit (_key_ _position_))
+(redis-cmd-i-tf setbit (_key_ _position_ _value_))
 
 ; return the length of a string
 (redis-cmd-i strlen (_key_))
@@ -164,6 +169,10 @@
 
 ; Return and remove (atomically) the last element of the source List stored at _srckey_ and push the same element to the destination List stored at _dstkey_
 (redis-cmd-b rpoplpush (_srckey_ _dstkey_))
+
+; Blocking rpoplpush
+(redis-cmd-b brpoplpush (_srckey_ _dstkey_))
+
 
 
 ;; Commands operating on sets ;;

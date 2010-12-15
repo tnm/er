@@ -69,6 +69,7 @@ handle_call({cmd, Parts}, From,
 handle_call({cmd, Parts}, From,
     #state{available = [H|T], reserved = R} = State) when
     hd(Parts) =:= <<"blpop">> orelse
+    hd(Parts) =:= <<"brpoplpush">> orelse
     hd(Parts) =:= <<"brpop">> ->
   Caller = self(),
   spawn(fun() ->
