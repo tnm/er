@@ -1,0 +1,13 @@
+{application, er,
+ [
+  {description, "Erlang Redis Library Application"},
+  {vsn, "0.5.0"},
+  {modules, []},
+  {registered, [er_sup]},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, {er_app, []}},
+  {env, []}
+ ]}.
