@@ -38,9 +38,9 @@
 
 ; rename the old key in the new one, destroing the newname key if it already exists
 ; > er:rename(C, bob2, bob3).
-; ** exception throw: {redis_return_status,<<"ERR no such key">>}
+; ** exception throw: {redis_error,<<"ERR no such key">>}
 ; > er:rename(C, bob3, bob3).
-; ** exception throw: {redis_return_status,<<"ERR source and destination objects are the same">>}
+; ** exception throw: {redis_error,<<"ERR source and destination objects are the same">>}
 (redis-cmd-s rename (_oldname_ _newname_))
 
 ; rename the old key in the new one, if the newname key does not already exist

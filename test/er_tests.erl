@@ -33,11 +33,11 @@ er_basic_commands_test_() ->
         ?_E(<<"ralph">>, er:get(C, <<>>)),
         ?_E(1,     er:del(C, <<>>)),
         ?_assertException(throw,
-          {redis_return_status, <<"ERR no such key">>},
+          {redis_error, <<"ERR no such key">>},
           er:rename(C, bob2, bob3)),
         ?_E(ok, er:set(C, bob3, bob3content)),
         ?_assertException(throw,
-          {redis_return_status,
+          {redis_error,
             <<"ERR source and destination objects are the same">>},
           er:rename(C, bob3, bob3)),
         ?_E(ok,    er:rename(C, bob3, bob2)),
@@ -169,8 +169,12 @@ er_sorted_sets_commands_test_() ->
         ?_E(inf,   er:zincrby(C, zsetA, "inf", amember1)),
         ?_E(1,     er:zrank(C, zsetA, amember1)),  % -20 + inf = top of list
         ?_E(0,     er:zrank(C, zsetA, amember2)),
-%        ?_E(nan,   er:zincrby(C, zsetA, "-inf", amember1)),
-%        ?_E(nan, er:zincrby(C, zsetA, "-inf", amember1)),  % crashes redis
+        ?_assertException(throw,
+          {redis_error, <<"ERR resulting score is not a number (NaN)">>},
+          er:zincrby(C, zsetA, "-inf", amember1)),
+        ?_assertException(throw,
+          {redis_error, <<"ERR resulting score is not a number (NaN)">>},
+          er:zincrby(C, zsetA, "-inf", amember1)),
         ?_E(1,    er:zrank(C, zsetA, amember1)),  % at position inf, it moves up
         ?_E(0,    er:zrank(C, zsetA, amember2)),
         ?_E([<<"amember2">>, <<"amember1">>], er:zrange(C, zsetA, 0, 3)),
@@ -324,7 +328,7 @@ er_return_test_() ->
     [
       ?_E(nil,      er:'redis-return-nil'(nil)),
       ?_E(ok,       er:'redis-return-status'([<<"ok">>])),
-      ?_assertException(throw, {redis_return_status, <<"throwed">>},
+      ?_assertException(throw, {redis_error, <<"throwed">>},
         er:'redis-return-status'({error, <<"throwed">>})),
       ?_E(53,       er:'redis-return-integer'([<<"53">>])),
       ?_E(inf,      er:'redis-return-integer'([<<"inf">>])),

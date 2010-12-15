@@ -42,7 +42,7 @@
 (defun redis-return-nil (x) x)
 
 (defun redis-return-status 
-  ([(tuple 'error bin)] (throw (tuple 'redis_return_status bin)))
+  ([(tuple 'error bin)] (throw (tuple 'redis_error bin)))
   ([x] (when (is_binary x))
     (list_to_atom (: string to_lower (binary_to_list x))))
   ([(x)] (when (is_binary x))
@@ -59,7 +59,8 @@
   ([(tuple 'ok #b("-inf"))] '-inf)
   ([(tuple 'ok #b("nan"))] 'nan)
   ([(tuple 'ok x)] (when (is_binary x)) (list_to_integer (binary_to_list x)))
-  ([(x)] (when (is_binary x)) (list_to_integer (binary_to_list x))))
+  ([(x)] (when (is_binary x)) (list_to_integer (binary_to_list x)))
+  ([(tuple 'error bin)] (throw (tuple 'redis_error bin))))
 
 (defun redis-return-single-line
   ([()] #b())
