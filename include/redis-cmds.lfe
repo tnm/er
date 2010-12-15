@@ -119,10 +119,11 @@
 ; return a substring out of a larger string
 (redis-cmd-b substr (_key_ _start_ _end_))   ; substr = getrange in 2.2+
 (redis-cmd-b getrange (_key_ _start_ _end_)) ; getrange = substr for redis 2.2+
+
 (redis-cmd-i setrange (_key_ _start_ _end_))
 
 (redis-cmd-i getbit (_key_ _position_))
-(redis-cmd-i-tf setbit (_key_ _position_ _value_))
+(redis-cmd-i setbit (_key_ _position_ _value_))
 
 ; return the length of a string
 (redis-cmd-i strlen (_key_))

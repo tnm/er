@@ -66,8 +66,8 @@ er_basic_commands_test_() ->
         % append,
 
         % bitkey: 01000000 = @
-        ?_E(true,    er:setbit(C, bitkey, 1, 1)),
-        ?_E(<<"@">>, er:get(C, bitkey)),
+        ?_E(0, er:setbit(C, bitkey, 1, 1)),
+        ?_E(<<01000000:8>>, er:get(C, bitkey)),
         ?_E(1, er:getbit(C, bitkey, 1)),
         ?_E(0, er:getbit(C, bitkey, 0)),
         ?_E(0, er:getbit(C, bitkey, 12)),
@@ -75,18 +75,18 @@ er_basic_commands_test_() ->
         ?_E(0, er:getbit(C, bitkey, 64)),
         ?_E(0, er:getbit(C, bitkey, 999)),
         % test setting arbitrarily large index
-        ?_E(true, er:setbit(C, bitkey, 1024968, 1)),
+        ?_E(0, er:setbit(C, bitkey, 1024968, 1)),
         ?_E(0, er:getbit(C, bitkey, 1024967)),
         ?_E(1, er:getbit(C, bitkey, 1024968)),
         ?_E(0, er:getbit(C, bitkey, 1024969)),
         % binarykey
-        ?_E(true, er:setbit(C, binarykey, 0, 1)),
+        ?_E(0, er:setbit(C, binarykey, 0, 1)),
         % 10000000 = 128
         ?_E(<<128>>, er:get(C, binarykey)),
-        ?_E(true,    er:setbit(C, binarykey, 7, 1)),
+        ?_E(0,    er:setbit(C, binarykey, 7, 1)),
         % 10000001 = 128
         ?_E(<<129>>, er:get(C, binarykey)),
-        ?_E(true,    er:setbit(C, binarykey, 64, 1)),
+        ?_E(0,    er:setbit(C, binarykey, 64, 1)),
         % binarykey = (see next three lines)
         % [10000001]
         % [00000000][00000000][00000000][00000000][00000000][00000000][00000000]
