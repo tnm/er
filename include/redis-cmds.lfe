@@ -148,6 +148,18 @@
 ; Return the element at index position from the List at key
 (redis-cmd-b lindex (_key_ _index_))
 
+; Push on the left if the list exists.
+; Returns number of elements in list.  Returns zero if list isn't created.
+(redis-cmd-i lpushx (_key_ _value_))
+
+; Push on the right if the list exists.
+; Returns number of elements in list.  Returns zero if list isn't created.
+(redis-cmd-i rpushx (_key_ _value_))
+
+; Insert before or after a value in a list
+; Returns the number of elements in list
+(redis-cmd-i linsert (_key_ _before_or_after_ _existing_value_ _new_value_))
+
 ; Set a new value as the element at index position of the List at key
 (redis-cmd-s lset (_key_ _index_ _value_))
 

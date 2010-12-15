@@ -147,9 +147,20 @@ er_lists_commands_test_() ->
         ?_E(6, er:llen(C, listA)),
         ?_E([<<"aitem6">>], er:lrange(C, listA, 0, 0)),
         ?_E([<<"aitem6">>, <<"aitem5">>], er:lrange(C, listA, 0, 1)),
-        ?_E([], er:lrange(C, listA, 10, 20))
+        ?_E([], er:lrange(C, listA, 10, 20)),
+        ?_E(7, er:lpushx(C, listA, aitem7)),
+        % aitem7, aitem6, aitem5, aitem4, aitem1, aitem2, aitem3
+        ?_E(8, er:rpushx(C, listA, aitem3)),
+        % aitem7, aitem6, aitem5, aitem4, aitem1, aitem2, aitem3
+        ?_E(0, er:lpushx(C, noneList, aitemZ)),
+        ?_E(0, er:rpushx(C, noneList, aitemZ)),
+        ?_E(9, er:linsert(C, listA, before, aitem5, aitemNew)),
+        % aitem7, aitem6, aitemNew, aitem5, aitem4, aitem1, aitem2, aitem3, aitemZ
+        ?_E(10, er:linsert(C, listA, 'after', aitem1, aitemNew2)),
+        % aitem7, aitem6, aitemNew, aitem5, aitem4, aitem1, aitemNew2, aitem2, aitem3, aitemZ
+        ?_E(<<"aitem6">>, er:lindex(C, listA, 1)),
+        ?_E(<<"aitem1">>, er:lindex(C, listA, 5))
         % ltrim
-        % lindex
         % lset
         % lrem
         % lpop
