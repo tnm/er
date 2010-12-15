@@ -4,14 +4,14 @@ er: erlang redis
 Status
 ------
 er is production ready.
-er is feature complete with redis-2.2 as of antirez/redis@6a246b1e7e9df7d7c104545d6d99819c6842511a
+er is feature complete with redis-2.2 as of antirez/redis@59aee5513d27fdf2d24499f35611093fa0fab3fb 
 
 Code Guide
 ----------
-`src/er.lfe` and `src/erp.lfe` are the starting points for LFE redis commands.
+`src/er.lfe` and `src/erp.lfe` are where redis commands get created.
 
 `er.lfe` creates a module where the first parameter of all commands is the
-redis connection (the conenction is either a er_redis or er_pool):
+redis connection (the conenction is either a `er_redis` PID or `er_pool` name):
         {ok, Client} = er_redis:connect().
         er:set(Client, <<"chevron">>, <<"locked">>).
 
@@ -22,25 +22,32 @@ through all the commands:
         RedisClient:set(<<"artist">>, <<"pallett">>).
 
 `er_pool.erl` gives you a centrally managed connection pool of redis clients.
-Create the pool then use regular `er` commands against the pool.  If you use
+Create a named pool, then use regular `er` commands against it.  If you use
 a command requiring exclusive use of a client (b[lr]pop, brpoplpush, subscribe, watch, etc),
 the client is taken out of the general pool and reserved for your individual
-use. When the client is done with its exclusive operations, the client is returned
+use. When the client is done with exclusive operations, the client is returned
 to the general connection pool.
 
-### Connect
+### Connect and use anonymous pid
         {ok, Client} = er_pool:start_link().
         er:set(Client, italian, greyhound).
         <<"greyhound">> = er:get(Client, italian).
 
+### Connect and use named pool (no need for pid tracking)
+        er_pool:start_link(userdb).
+        er:set(userdb, hash_value_1, erlang:md5(<<"hash this">>).
+        er:lpush(userdb, updates, hash_value_1).
+
 ### Blocking Pop
-        er:blpop(Client, blocked_key, 600).  % blocks reading blocked_key until the 600 second
-                                             % timeout or until an item is available.
-                                             % returns atom nil on timeout.
+Blocking pop blocks the current process until Timeout (600 seconds below) or until
+  an item becomes available.  Blocking operations return the atom nil on timeout.
+        er_pool:start_link(workqueue_pool).
+        er:blpop(workqueue_pool, blocked_key, 600).
 
 ### PubSub
+        er_pool:start_link(announcements).
         % Subscribe to key `another`.  Returns a pid and subscribe validation.
-        {SubClientPid, [subscribe, <<"another">>, 1]} = er:subscribe(Client, another).
+        {SubClientPid, [subscribe, <<"another">>, 1]} = er:subscribe(announcements, another).
 
         % To receive published messages, run a blocking receive.
         % er_next blocks your current process until something is published.
