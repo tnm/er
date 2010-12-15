@@ -22,7 +22,7 @@ redis_setup_clean() ->
                              % er_pool,  inorder    = 16 seconds
                              % er_redis, inparallel = 1.5 to 2 seconds
                              % er_redis, inorder    = 16 seconds
-  Cxn = case ConcurrencyMod:start_link() of
+  Cxn = case ConcurrencyMod:start_link(er_pool, "127.0.0.1", 6991) of
           {ok, C} -> C;
           {error, {already_started, Pid}} -> Pid
         end,

@@ -6,7 +6,7 @@
 
 redis_setup_clean() ->
   TestModule = er_redis,
-  {ok, Cxn} = TestModule:start_link(),
+  {ok, Cxn} = TestModule:start_link("127.0.0.1", 6991),
   ok = er:flushall(Cxn),
   Cxn.
 
