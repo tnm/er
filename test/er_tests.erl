@@ -248,9 +248,9 @@ er_sorted_sets_commands_test_() ->
              {<<"amember1">>, <<"inf">>}], er:zrange(C, zsetA, 0,3,withscores)),
         ?_E([<<"amember1">>, <<"amember2">>], er:zrevrange(C, zsetA, 0, 3)),
         ?_E([{<<"amember1">>, <<"inf">>},
-             {<<"amember2">>, <<"10">>}], er:zrevrange(C,zsetA,0,3,withscores))
+             {<<"amember2">>, <<"10">>}], er:zrevrange(C,zsetA,0,3,withscores)),
+        ?_E(2,    er:zcard(C, zsetA)) 
         % zrangebyscore
-        % zcard
         % zscore
         % zremrangebyrank
         % zremrangebyscore
